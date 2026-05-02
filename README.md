@@ -28,7 +28,7 @@ brew --version
 Install terminal tools directly:
 
 ```zsh
-brew install git gh ripgrep fd jq tree uv fnm
+brew install git gh ripgrep fd jq tree uv fnm railway
 ```
 
 | Tool | Description | Official Link |
@@ -41,6 +41,7 @@ brew install git gh ripgrep fd jq tree uv fnm
 | tree | Directory tree viewer | [oldmanprogrammer.net/source.php?dir=projects/tree](https://oldmanprogrammer.net/source.php?dir=projects/tree) |
 | uv | Python package and version manager | [docs.astral.sh/uv](https://docs.astral.sh/uv/) |
 | fnm | Fast Node.js version manager | [github.com/Schniz/fnm](https://github.com/Schniz/fnm) |
+| Railway CLI | Railway deployment platform command-line tool | [docs.railway.com/guides/cli](https://docs.railway.com/guides/cli) |
 
 ### Brew Casks
 
@@ -322,6 +323,15 @@ gh config set git_protocol ssh --host github.com
 gh auth status
 ```
 
+## Railway CLI Setup
+
+Authenticate Railway CLI:
+
+```zsh
+railway login
+railway whoami
+```
+
 ## System Settings
 
 ### Security and Privacy
@@ -445,3 +455,9 @@ codex --version
 ```
 
 Expected result: Codex prints a CLI version, such as `codex-cli 0.128.0`.
+
+```zsh
+railway --version
+```
+
+Expected result: Railway prints a CLI version, such as `railway 4.44.0`.

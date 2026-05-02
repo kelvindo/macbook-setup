@@ -6,6 +6,7 @@ brew "jq"
 brew "tree"
 brew "uv"
 brew "fnm"
+brew "railway"
 
 cask "google-chrome"
 cask "ghostty"
