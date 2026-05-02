@@ -13,6 +13,7 @@ Install Homebrew first:
 Follow any post-install instructions Homebrew prints. On Apple Silicon Macs, that usually includes adding Homebrew to your shell environment:
 
 ```zsh
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
@@ -24,7 +25,7 @@ brew --version
 
 ### Brew Formulae
 
-Install terminal tools:
+Install terminal tools directly:
 
 ```zsh
 brew install git gh ripgrep fd jq tree uv fnm
@@ -43,7 +44,7 @@ brew install git gh ripgrep fd jq tree uv fnm
 
 ### Brew Casks
 
-Install Mac apps and app-like tools:
+Install Mac apps and app-like tools directly:
 
 ```zsh
 brew install --cask google-chrome ghostty cursor rectangle maccy codex codex-app
@@ -69,10 +70,16 @@ Install from the browser:
 
 ### Brewfile
 
-Create a reproducible Homebrew snapshot:
+After cloning this repo, use the checked-in `Brewfile` instead of running the individual `brew install` commands above:
 
 ```zsh
-brew bundle dump --file=~/Brewfile --force
+brew bundle --file=./Brewfile
+```
+
+After changing installed formulae or casks, refresh the checked-in snapshot:
+
+```zsh
+brew bundle dump --file=./Brewfile --force
 ```
 
 ## Shell Setup
@@ -110,7 +117,7 @@ alias c='cd ~/Code'
 # =============================================================================
 # Node
 # =============================================================================
-eval "$(fnm env --use-on-cd)"
+eval "$(fnm env --shell zsh --use-on-cd)"
 ```
 
 Reload the shell after updating `.zshrc`:
@@ -141,20 +148,19 @@ Restart the shell after `uv python update-shell`.
 Configure fnm and install the latest LTS Node.js:
 
 ```zsh
-eval "$(fnm env --use-on-cd)"
 fnm install --lts
 fnm default lts-latest
 node --version
 npm --version
 ```
 
-Add fnm to `.zshrc`:
+If you did not add fnm to `.zshrc` above, add it now:
 
 ```zsh
 # =============================================================================
 # Node
 # =============================================================================
-eval "$(fnm env --use-on-cd)"
+eval "$(fnm env --shell zsh --use-on-cd)"
 ```
 
 ## Code Workspace
@@ -171,6 +177,14 @@ cd ~/Code
 ## GitHub SSH Setup
 
 Reference: [GitHub SSH key setup docs](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+
+If you prefer GitHub CLI for authentication, run this before adding SSH keys manually:
+
+```zsh
+gh auth login
+gh config set git_protocol ssh --host github.com
+gh auth status
+```
 
 ### 1. Check for Existing SSH Keys
 
@@ -195,6 +209,8 @@ When prompted:
 
 - Save to the default path: `~/.ssh/id_ed25519`
 - Use a passphrase if you want extra protection
+
+Stop before accepting the default path if `~/.ssh/id_ed25519` already exists, unless you intentionally want to replace that key.
 
 ### 3. Configure SSH for GitHub
 
@@ -221,7 +237,13 @@ ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 
 ### 5. Add the Public Key to GitHub
 
-Copy the public key:
+Add the public key with GitHub CLI:
+
+```zsh
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "MacBook $(date +%Y-%m-%d)"
+```
+
+Or copy the public key:
 
 ```zsh
 pbcopy < ~/.ssh/id_ed25519.pub
@@ -246,6 +268,21 @@ Hi USERNAME! You've successfully authenticated, but GitHub does not provide shel
 ```
 
 ## Git Setup
+
+### Cursor CLI for Git
+
+Install the Cursor shell command:
+
+```text
+Cursor -> Command Palette -> Shell Command: Install 'cursor' command in PATH
+```
+
+Verify:
+
+```zsh
+command -v cursor
+cursor --version
+```
 
 ### Global Git Config
 
@@ -275,24 +312,9 @@ git config --global alias.lg "log --oneline --graph --decorate --all"
 | `git st` | `git status` | Show working tree status |
 | `git lg` | `git log --oneline --graph --decorate --all` | Show compact branch history |
 
-### Cursor CLI for Git
-
-Install the Cursor shell command:
-
-```text
-Cursor -> Command Palette -> Shell Command: Install 'cursor' command in PATH
-```
-
-Verify:
-
-```zsh
-command -v cursor
-cursor --version
-```
-
 ## GitHub CLI Setup
 
-Authenticate GitHub CLI:
+If you skipped GitHub CLI authentication during SSH setup, authenticate now:
 
 ```zsh
 gh auth login
@@ -301,6 +323,16 @@ gh auth status
 ```
 
 ## System Settings
+
+### Security and Privacy
+
+Set:
+
+- [ ] Turn on FileVault: `System Settings -> Privacy & Security -> FileVault`
+- [ ] Turn on Firewall: `System Settings -> Network -> Firewall`
+- [ ] Require password immediately after screen saver begins or display is turned off: `System Settings -> Lock Screen`
+- [ ] Sign in to 1Password and enable browser integration
+- [ ] Optional: enable Touch ID for `sudo`
 
 ### Finder Defaults
 
@@ -366,3 +398,50 @@ Enable and set:
 
 - [ ] Move left a space -> Option + [
 - [ ] Move right a space -> Option + ]
+
+## Final Verification
+
+Run a final sanity check. After each command, compare your output with the expected result below it.
+
+```zsh
+brew doctor
+```
+
+Expected result: Homebrew says `Your system is ready to brew.`
+
+```zsh
+git --version
+```
+
+Expected result: Git prints a version, such as `git version 2.54.0`.
+
+```zsh
+gh auth status
+```
+
+Expected result: GitHub CLI shows you are logged in to `github.com`, and the active account token is valid.
+
+```zsh
+ssh -T git@github.com
+```
+
+Expected result: GitHub greets your username and says you successfully authenticated. The message also says GitHub does not provide shell access; that part is normal.
+
+```zsh
+uv python list
+```
+
+Expected result: uv lists at least one installed Python under `~/.local/share/uv/python`. It may also show other Python versions as available downloads.
+
+```zsh
+node --version
+npm --version
+```
+
+Expected result: both commands print versions. If `node` works but `npm` does not, reload the shell with `exec zsh` and confirm fnm is initialized in `.zshrc`.
+
+```zsh
+codex --version
+```
+
+Expected result: Codex prints a CLI version, such as `codex-cli 0.128.0`.
